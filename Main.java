@@ -1,3 +1,5 @@
+import java.io.FileReader;
+import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -20,14 +22,18 @@ import java.util.*;
 public class Main
 {
     private static ListView<Address> AddressListView;
-    private static ArrayList<Address> uniArrList = new ArrayList<Address>();
+    private static ArrayList<Address> AddressArrList = new ArrayList<Address>();
     private static Address currentlySelectedAddress = null;
     private static TextField txtFieldAddress1;
     private static TextField txtFieldAddress2;
     private static TextField txtFieldPostcode;
     private static TextField txtFieldCountry;
     private static TextField txtFieldPhone;
-    public static void main(String args[]){
+    private static TextField txtFieldTown;
+    private static TextField txtFieldname;
+    private static TextField txtFieldemail;
+    private static int listviewsize;
+    public static void main(String args[])throws IOException{
 
         launchFX();
     } 
@@ -50,67 +56,86 @@ public class Main
         stage.show();// This presents the GUI
 
         AddressListView = new ListView<Address>();
-        AddressListView.setLayoutX(700);
+        AddressListView.setLayoutX(300);
         AddressListView.setLayoutY(50);
+        AddressListView.setPrefWidth(700);
         AddressListView.setOnMouseClicked((MouseEvent me) -> {
                 currentlySelectedAddress = AddressListView.getSelectionModel().getSelectedItem();
             });
         rootPane.getChildren().add(AddressListView);
         updateListView();
 
-        txtFieldAddress1 = new TextField(); 
-        txtFieldAddress1.setLayoutX(400);
-        txtFieldAddress1.setLayoutY(200);
+        txtFieldname = new TextField(); 
+        txtFieldname.setLayoutX(10);
+        txtFieldname.setLayoutY(50);
+        txtFieldname.setPrefWidth(100);
+        txtFieldname.setPromptText("Name");
+        rootPane.getChildren().add(txtFieldname);
+
+        txtFieldAddress1 = new TextField();
+        txtFieldAddress1.setLayoutX(10);
+        txtFieldAddress1.setLayoutY(100);
         txtFieldAddress1.setPrefWidth(100);
-        txtFieldAddress1.setPromptText("Name");
+        txtFieldAddress1.setPromptText("Address 1");
         rootPane.getChildren().add(txtFieldAddress1);
 
-         txtFieldAddress2 = new TextField(); 
-        txtFieldAddress2.setLayoutX(400);
-        txtFieldAddress2.setLayoutY(300);
+        txtFieldAddress2 = new TextField();
+        txtFieldAddress2.setLayoutX(10);
+        txtFieldAddress2.setLayoutY(250);
         txtFieldAddress2.setPrefWidth(100);
         txtFieldAddress2.setPromptText("Address 2");
         rootPane.getChildren().add(txtFieldAddress2);
-        
-        txtFieldPhone = new TextField(); 
-        txtFieldPhone.setLayoutX(400);
-        txtFieldPhone.setLayoutY(350);
+
+        txtFieldPhone = new TextField();
+        txtFieldPhone.setLayoutX(10);
+        txtFieldPhone.setLayoutY(150);
         txtFieldPhone.setPrefWidth(100);
         txtFieldPhone.setPromptText("Phone Number");
         rootPane.getChildren().add(txtFieldPhone);
 
         txtFieldPostcode = new TextField(); 
-        txtFieldPostcode.setLayoutX(400);
-        txtFieldPostcode.setLayoutY(400);
+        txtFieldPostcode.setLayoutX(10);
+        txtFieldPostcode.setLayoutY(200);
         txtFieldPostcode.setPrefWidth(100);
         txtFieldPostcode.setPromptText("Postcode");
         rootPane.getChildren().add(txtFieldPostcode);
 
-        txtFieldAddress1 = new TextField(); 
-        txtFieldAddress1.setLayoutX(400);
-        txtFieldAddress1.setLayoutY(250);
-        txtFieldAddress1.setPrefWidth(100);
-        txtFieldAddress1.setPromptText("Address 1");
-        rootPane.getChildren().add(txtFieldAddress1);
-        
+        txtFieldemail = new TextField();
+        txtFieldemail.setLayoutX(10);
+        txtFieldemail.setLayoutY(250);
+        txtFieldemail.setPrefWidth(100);
+        txtFieldemail.setPromptText("Email");
+        rootPane.getChildren().add(txtFieldemail);
 
         Button Add = new Button();
         Add.setText("Add item");
-        Add.setLayoutX(300);
-        Add.setLayoutY(265);
+        Add.setLayoutX(25);
+        Add.setLayoutY(700);
         Add.setOnAction((ActionEvent ae) -> addnewItem());
         rootPane.getChildren().add(Add);
 
+        Button Readfile = new Button();
+        Readfile.setText("Read File");
+        Readfile.setLayoutX(125);
+        Readfile.setLayoutY(700);
+        Readfile.setOnAction((ActionEvent ae) -> Readfromfile());
+        rootPane.getChildren().add(Readfile);
+
+        Button save = new Button();
+        save.setText("Save");
+        save.setLayoutX(225);
+        save.setLayoutY(700);
+        save.setOnAction((ActionEvent ae) -> saveaddress());
+        rootPane.getChildren().add(save);
+
         Button delete = new Button();
         delete.setText("delete item");
-        delete.setLayoutX(300);
-        delete.setLayoutY(230);
+        delete.setLayoutX(325);
+        delete.setLayoutY(700);
         delete.setOnAction((ActionEvent ae) -> deleteItem());
         rootPane.getChildren().add(delete);
 
         Label Title = new Label("Address Details");
-        Title.setLayoutX(400);
-        Title.setLayoutY(220);
         rootPane.getChildren().add(Title);
 
     }
@@ -118,33 +143,65 @@ public class Main
     private static void addnewItem(){
         String Address1 = txtFieldAddress1.getText();
         String Address2 = txtFieldAddress2.getText();
-        String Country = txtFieldCountry.getText();
-        String Town = txtFieldTown.getText();
+        String Phone = txtFieldPhone.getText();
+        String Email = txtFieldemail.getText();
+        String name = txtFieldname.getText();
         String Postcode = txtFieldPostcode.getText();
-        AddressArrList.add(new Address(Address1, Address2, Postcode,Town,Country));
+        AddressArrList.add(new Address(name,Address1,Address2,Phone,Postcode,Email));
         AddressListView.getItems().clear();
 
         for(Address Address : AddressArrList){
-            AddressListView.getItems().add(Address); 
+            AddressListView.getItems().add(Address);
+            listviewsize++;
         }
     }
 
     private static void terminate()
     {
-        System.out.println("bye bye!");
+        System.out.println("bye!");
         System.exit(0);
     }
+
+    private static void Readfromfile(){
+        try{
+            FileReader fr = new FileReader("U:\\Computing\\Mock Project\\Address.txt");
+            BufferedReader br = new BufferedReader(fr);
+            String line;
+
+            while ((line = br.readLine()) !=null){
+                String[] values = line.split(",");
+                Address addresses = new Address(values[0],values[1],values[2],values[3],values[4],values[5]);
+                AddressArrList.add(addresses);
+            }
+            br.close();
+            updateListView();
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    private static void saveaddress(){
+        FileWriter fw = new FileWriter("U:\\Computing\\Mock Project\\Address.txt");
+        BufferedWriter bw = new BufferedWriter(fw);
+        for (int i= 0; i<listviewsize;i++){
+            String Selected = AddressListView.getSelectionModel().getSelectedItem(i);
+        }
+        bw.close();
+    }
+
 
     private static void updateListView(){
         AddressListView.getItems().clear();
 
-        for(Address Address : AddressArrList){//for every university object in uniArraylist
-            AddressListView.getItems().add(Address); // put each object into the list view
+        for(Address Address : AddressArrList){
+            AddressListView.getItems().add(Address);
         }
     }
 
     private static void deleteItem() {
         AddressArrList.remove(currentlySelectedAddress);
+        listviewsize--;
         updateListView();
 
     }
